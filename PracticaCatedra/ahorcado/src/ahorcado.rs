@@ -7,7 +7,7 @@ pub enum InputError{
     LetraYaIngresada,
 }
 struct Ronda{
-    intentos: i8,
+    intentos: i8,    
     palabra_tapada: Vec<char>,
     letras_usadas: Vec<char>,
 }

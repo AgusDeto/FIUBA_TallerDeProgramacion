@@ -1,0 +1,1 @@
+/home/agustindetoffoli/Escritorio/TallerDeProgamacion/FIUBA_TallerDeProgramacion/Forth/target/debug/Forth: /home/agustindetoffoli/Escritorio/TallerDeProgamacion/FIUBA_TallerDeProgramacion/Forth/src/funciones.rs /home/agustindetoffoli/Escritorio/TallerDeProgamacion/FIUBA_TallerDeProgramacion/Forth/src/main.rs
