@@ -38,62 +38,185 @@ impl Forth{
     }
 
     pub fn sumar(&mut self){
-        let mut suma: i16 = 0;
-        let x = self.pila.pop();
-        match x{
+        match self.pila.pop(){
             None => (),//error
-            Some(val) => suma += val,
+            Some(val1) => {
+                match self.pila.pop(){
+                    None => (),//error
+                    Some(val2) => self.pila.push(val1+val2),
+                }
+            },
         }
-        let y = self.pila.pop();
-        match y{
-            None => (),//error
-            Some(val) => suma += val,
-        }
-        self.pila.push(suma);
     }
 
     pub fn restar(&mut self){
-        let mut resta: i16 = 0;
-        let x = self.pila.pop();
-        match x{
+        match self.pila.pop(){
             None => (),//error
-            Some(val) => resta += val,
+            Some(val1) => {
+                match self.pila.pop(){
+                    None => (),//error
+                    Some(val2) => self.pila.push(val2-val1),
+                }
+            },
         }
-        let y = self.pila.pop();
-        match y{
-            None => (),//error
-            Some(val) => resta -= val,
-        }
-        self.pila.push(resta);
     }
 
     pub fn dividir(&mut self){
-        let mut division: i16 = 0;
-        let x = self.pila.pop();
-        match x{
+        match self.pila.pop(){
             None => (),//error
-            Some(val) => division += val,
+            Some(val1) => {
+                match self.pila.pop(){
+                    None => (),//error
+                    Some(val2) => self.pila.push(val2/val1),
+                }
+            },
         }
-        let y = self.pila.pop();
-        match y{
-            None => (),//error
-            Some(val) => division /= val,
-        }
-        self.pila.push(division);
     }
 
     pub fn multiplicar(&mut self){
-        let mut multiplicacion: i16 = 0;
-        let x = self.pila.pop();
-        match x{
+        match self.pila.pop(){
             None => (),//error
-            Some(val) => multiplicacion += val,
+            Some(val1) => {
+                match self.pila.pop(){
+                    None => (),//error
+                    Some(val2) => self.pila.push(val1*val2),
+                }
+            },
         }
-        let y = self.pila.pop();
-        match y{
+    }
+
+    pub fn dup(&mut self){
+        match self.pila.pop(){
             None => (),//error
-            Some(val) => multiplicacion *= val,
+            Some(val) => 
+                {self.pila.push(val);
+                self.pila.push(val)},
         }
-        self.pila.push(multiplicacion);
+    }
+
+    pub fn drop(&mut self){
+        match self.pila.pop(){
+            None => (),//error
+            Some(_) => (),
+        }
+    }
+
+    pub fn swap(&mut self){
+        match self.pila.pop(){
+            None => (),
+            Some(val1) => {
+                match self.pila.pop(){
+                None => (),
+                Some(val2) => {
+                    self.pila.push(val1);
+                    self.pila.push(val2);
+                },
+            }},
+        }
+    }
+
+    pub fn over(&mut self){
+        match self.pila.pop(){
+            None => (),
+            Some(val1) => {
+                match self.pila.pop(){
+                None => (),
+                Some(val2) => {
+                    self.pila.push(val2);
+                    self.pila.push(val1);
+                    self.pila.push(val2);
+                },
+            }},
+        }
+    }
+
+    pub fn rot(&mut self){
+        match self.pila.pop(){
+            None => (),
+            Some(val1) => {
+                match self.pila.pop(){
+                None => (),
+                Some(val2) => match self.pila.pop(){
+                    None => (),
+                    Some(val3) => {
+                        self.pila.push(val2);
+                        self.pila.push(val1);
+                        self.pila.push(val3);
+                    },}
+            }},
+        }
+    }
+    /* 
+    pub fn emit(){
+        match self.pila.pop(){
+            None => (),//error
+            Some(val) => print('{val}'),
+        }
+    }*/
+    pub fn mayor(&mut self){
+        match self.pila.pop(){
+            None => (),
+            Some(val1) => {
+                match self.pila.pop(){
+                None => (),
+                Some(val2) => {
+                    if(val2>val1){self.pila.push(-1)}
+                    else{self.pila.push(0);}
+                },
+            }},
+        }
+    }
+
+    pub fn menor(&mut self){
+        match self.pila.pop(){
+            None => (),
+            Some(val1) => {
+                match self.pila.pop(){
+                None => (),
+                Some(val2) => {
+                    if(val2<val1){self.pila.push(-1)}
+                    else{self.pila.push(0);}
+                },
+            }},
+        }
+    }
+
+    pub fn igual(&mut self){
+        match self.pila.pop(){
+            None => (),
+            Some(val1) => {
+                match self.pila.pop(){
+                None => (),
+                Some(val2) => {
+                    if(val2==val1){self.pila.push(-1)}
+                    else{self.pila.push(0);}
+                },
+            }},
+        }
+    }
+
+    pub fn and(&mut self){
+        match self.pila.pop(){
+            None => (),
+            Some(val1) => {
+                match self.pila.pop(){
+                None => (),
+                Some(val2) => self.pila.push(val1 & val2),
+                }
+            },
+        }
+    }
+
+    pub fn or(&mut self){
+        match self.pila.pop(){
+            None => (),
+            Some(val1) => {
+                match self.pila.pop(){
+                None => (),
+                Some(val2) => self.pila.push(val1 | val2),
+                }
+            },
+        }
     }
 }
+

@@ -27,16 +27,19 @@ fn main() {
     let mut forth = Forth::construir(stack_size);
     forth.imprimir_tamanio();
     forth.carriage_return();
-    forth.apilar("25");
     forth.apilar("10");
+    forth.apilar("-8");
     forth.imprimir_pila();
-    forth.sumar();
+    forth.mayor();
     forth.imprimir_pila();
-    forth.apilar("3");
-    forth.multiplicar();
+    forth.apilar("10");
+    forth.apilar("-12");
     forth.imprimir_pila();
-    forth.punto();
-    forth.punto();
-
-    
+    forth.menor();
+    forth.imprimir_pila();
+    forth.apilar("-10");
+    forth.apilar("-10");
+    forth.imprimir_pila();
+    forth.igual();
+    forth.imprimir_pila();
 }
