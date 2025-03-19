@@ -2,7 +2,7 @@ use std::{env, num::ParseIntError};
 mod funciones;
 use crate::funciones::Forth;
 
-fn leer_stack_size(arg_stack_size: &String) -> Result<u32, ParseIntError>{
+fn leer_stack_size(arg_stack_size: &str) -> Result<u32, ParseIntError>{
     let vec = arg_stack_size.chars();
     let mut numero: String = String::new();
     for caracter in vec{

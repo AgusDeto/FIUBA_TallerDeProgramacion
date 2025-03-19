@@ -160,7 +160,7 @@ impl Forth{
                 match self.pila.pop(){
                 None => (),
                 Some(val2) => {
-                    if(val2>val1){self.pila.push(-1)}
+                    if val2>val1 {self.pila.push(-1)}
                     else{self.pila.push(0);}
                 },
             }},
@@ -174,7 +174,7 @@ impl Forth{
                 match self.pila.pop(){
                 None => (),
                 Some(val2) => {
-                    if(val2<val1){self.pila.push(-1)}
+                    if val2<val1 {self.pila.push(-1)}
                     else{self.pila.push(0);}
                 },
             }},
@@ -188,7 +188,7 @@ impl Forth{
                 match self.pila.pop(){
                 None => (),
                 Some(val2) => {
-                    if(val2==val1){self.pila.push(-1)}
+                    if val2==val1 {self.pila.push(-1)}
                     else{self.pila.push(0);}
                 },
             }},
