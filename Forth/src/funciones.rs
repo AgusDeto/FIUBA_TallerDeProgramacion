@@ -13,16 +13,56 @@ impl Forth{
             pila: Vec::new(),
         }
     }
+
     pub fn carriage_return(&self){
         println!();
     }
 
+    pub fn leer_linea(&mut self, linea: &str){
+        let palabras: Vec<&str> = linea.split_terminator(&[' '][..]).collect();
+        for palabra in palabras{
+            self.ejecutar_funcion(palabra);
+        }
+    }
+
+    pub fn ejecutar_funcion(&mut self, funcion: &str){
+        match funcion{
+            "CR" => self.carriage_return(),
+            "." => self.punto(),
+            "EMIT" => self.emit(),
+            "+" => self.sumar(),
+            "-" => self.restar(),
+            "*" => self.multiplicar(),
+            "/" => self.dividir(),
+            "DUP" => self.dup(),
+            "DROP" => self.drop(),
+            "SWAP" => self.swap(),
+            "OVER" => self.over(),
+            "ROT" => self.rot(),
+            "=" => self.igual(),
+            ">" => self.mayor(),
+            "<" => self.menor(),
+            "AND" => self.and(),
+            "OR" => self.or(),
+            &_ => (),
+        }
+        match funcion.parse::<i16>() {
+            Ok(valor) => self.apilar(valor),
+            Err(_) => (),
+        }
+    }
+
     pub fn punto(&mut self){
+
         let x = self.pila.pop();
         match x{
-            None => (),//error
-            Some(val) => println!("{} ", val),
+            None => println!("Stack underflow"),
+            Some(val) => print!("{} ", val),
         }
+    }
+
+    fn imprimir_literal(cadena: &str){
+        
     }
 
     pub fn imprimir_tamanio(&self){
@@ -33,8 +73,8 @@ impl Forth{
         println!("{:?}", self.pila);
     }
 
-    pub fn apilar(&mut self, valor: &str){
-        self.pila.push(valor.parse::<i16>().unwrap());
+    pub fn apilar(&mut self, valor: i16){
+        self.pila.push(valor);
     }
 
     pub fn sumar(&mut self){
@@ -146,13 +186,16 @@ impl Forth{
             }},
         }
     }
-    /* 
-    pub fn emit(){
+    
+    pub fn emit(&mut self){
+        let mut imprimir: u8 = 127;
         match self.pila.pop(){
             None => (),//error
-            Some(val) => print('{val}'),
+            Some(val) => {imprimir = imprimir & val as u8;
+                            print!("{} ", imprimir as char)},
         }
-    }*/
+    }
+
     pub fn mayor(&mut self){
         match self.pila.pop(){
             None => (),
