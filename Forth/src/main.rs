@@ -4,6 +4,7 @@ use crate::funciones::Forth;
 use std::fs::File;
 use std::io::{self, BufReader};
 use std::io::prelude::*;
+use std::error::Error;
 
 fn leer_stack_size(arg_stack_size: &str) -> Result<u32, ParseIntError>{
     let vec = arg_stack_size.chars();
@@ -30,10 +31,12 @@ fn main() -> io::Result<()>{
     let f = BufReader::new(f);
     
     let mut compilador: Forth = Forth::construir(stack_size);
-
-    for line in f.lines() {
-        let line = line?;
-        compilador.leer_linea(&line);
+    let mut iterador = f.lines();
+    let mut error_flag = false;
+    let mut unpack = iterador.next();
+    while !unpack.is_none() && !error_flag {
+        error_flag = compilador.leer_linea(&unpack.expect(" ").unwrap());  
+        unpack = iterador.next();
     }
 
     Ok(())
