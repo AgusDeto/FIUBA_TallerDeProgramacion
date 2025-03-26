@@ -1,134 +1,90 @@
-use std::collections::HashMap;
 use std::collections::VecDeque;
+mod funcion;
+use crate::funciones::funcion::Funcion;
+mod word_manager;
+use crate::funciones::word_manager::WordManager;
 
 pub struct Forth{
-    tamanio_pila: u32,
+    tamanio_pila: usize,
     pila: VecDeque<i16>,
-    diccionario: HashMap< String, Vec<String>>,
+    word_manager: WordManager,
     flag_literal: bool,
     flag_error: bool,
+    flag_if: (bool,bool),
 }
 
 
 
 impl Forth{
-    pub fn construir(size_in_bytes: u32)-> Forth{
-        Forth{
+    pub fn construir(size_in_bytes: usize)-> Forth{
+        let c = Forth{
             tamanio_pila: if size_in_bytes == 0{
                 131072/2
             } else {size_in_bytes/2},
             pila: VecDeque::new(),
-            diccionario: HashMap::new(),
+            word_manager: WordManager::crear(),
             flag_literal: false,
             flag_error: false,
-        }
-    }
-
-    pub fn carriage_return(&self){
-        println!();
+            flag_if: (false,false),
+        };
+        c
     }
 
     pub fn leer_linea(&mut self, linea: &str) -> bool{
-        let palabras: VecDeque<&str> = linea.split_terminator(&[' '][..]).collect();
-        let mut i = 0;
-        while i < palabras.len() && !self.flag_error{
-            if palabras[i] == ":"{
-                i = self.cargar_word(&palabras, i);
+        let mut palabras: VecDeque<&str> = linea.split_terminator(&[' '][..]).collect();
+        let mut ejecutador = Funcion::crear();
+        while !palabras.is_empty() && !self.flag_error{
+            if palabras[0] == ":"{
+                palabras.pop_front();
+                let word_name = palabras.pop_front().unwrap();
+                let mut word_instructions: String = String::new();
+                while palabras[0] != ";" {
+                    word_instructions.push_str(palabras[0]);
+                    word_instructions.push(':');
+                    palabras.pop_front();
+                }
+                self.word_manager.agregar_word(word_name.to_string(), word_instructions);
             }
             else{
-                self.ejecutar_funcion(palabras[i]);
-                i += 1;
+                ejecutador.ejecutar_funcion(self, palabras[0]);
             }
+            palabras.pop_front();
         }
         self.flag_error
     }
 
-    pub fn ejecutar_funcion(&mut self, funcion: &str){
-            if self.flag_literal {
-                self.imprimir_literal(funcion);
-            }
-            match funcion.to_ascii_uppercase().as_str(){
-                "CR" => self.carriage_return(),
-                "." => self.punto(),
-                ".\"" => self.imprimir_literal(funcion),
-                "EMIT" => self.emit(),
-                "+" => self.sumar(),
-                "-" => self.restar(),
-                "*" => self.multiplicar(),
-                "/" => self.dividir(),
-                "DUP" => self.dup(),
-                "DROP" => self.drop(),
-                "SWAP" => self.swap(),
-                "OVER" => self.over(),
-                "ROT" => self.rot(),
-                "=" => self.igual(),
-                ">" => self.mayor(),
-                "<" => self.menor(),
-                "AND" => self.and(),
-                "OR" => self.or(),
-                &_ => (),
-            }
-            match funcion.parse::<i16>() {
-                Ok(valor) => self.apilar(valor),
-                Err(_) => (),
-            }
-            let word = self.diccionario.get(funcion);
-            match word{
-                Some(implementacion) => 
-                        for palabra in implementacion.clone(){
-                            self.ejecutar_funcion(palabra.as_str());
-                        },
-                None => (),
-            }
+    pub fn contiene_word(&mut self, word: &str) -> bool{
+        self.word_manager.contiene_word(word.to_string())
     }
 
-    pub fn punto(&mut self){
-        let x = self.desapilar();
-        print!("{} ", x);      
-    }
+    pub fn ejecutar_word(&mut self, word: &str){
+            let mut ejecutador = Funcion::crear();
+            let instrucciones_string = self.word_manager.obtener_instrucciones(word.to_string());
+            let instrucciones: Vec<&str> = instrucciones_string.split_terminator(&[':'][..]).collect();
+            for instruccion in instrucciones{
+                if instruccion == word {
+                    ejecutador.ejecutar_funcion_base(self, instruccion);
+                }
+                else{
+                    ejecutador.ejecutar_funcion(self, instruccion);
+                }
+
+            }
+        }
     
-    pub fn cargar_word(&mut self, palabras: &VecDeque<&str>, posicion_inicial: usize) -> usize{
-        let mut iterador = posicion_inicial + 2;
-        let word = palabras[posicion_inicial+1];
-        let mut implementacion: Vec<String> = Vec::new();     
-        while palabras[iterador] != ";" && iterador < palabras.len(){
-            implementacion.push(palabras[iterador].to_string());
-            iterador += 1;
-        };
-        self.diccionario.insert(word.to_string(), implementacion);
-        iterador + 1
-    }
-
-    fn imprimir_literal(&mut self, cadena: &str){
-        if(!self.flag_literal){
-            self.flag_literal = true;
-        }
-        else{
-            let mut cad_string = cadena.to_string();
-            match cad_string.pop(){
-                Some(val) => if val=='"'{
-                                        print!("{cad_string} ");
-                                    }else{print!("WRONG");},
-                None => (),
-            }
-            self.flag_literal = false;
-        }
-    }
-
-    pub fn imprimir_tamanio(&self){
-        println!("{}", self.tamanio_pila);
-    }
-
-    pub fn imprimir_pila(&self){
-        println!("{:?}", self.pila);
-    }
 
     pub fn apilar(&mut self, valor: i16){
-        self.pila.push_back(valor);
+        if self.pila.len() == self.tamanio_pila{
+            self.flag_error = true;
+            println!("CHE ESTA LLENA LA PILA PAPA QUE HACES");
+        }
+        else{
+            self.pila.push_back(valor);
+        }
     }
 
     pub fn desapilar(&mut self) -> i16{
-        if(!self.flag_error){
+        if !self.flag_error {
             match self.pila.pop_back(){
                 None => {self.flag_error = true;
                         println!("CHE ESTA VACIA LA PILA PAPA QUE HACES");
@@ -138,105 +94,6 @@ impl Forth{
         }0
     }
 
-    pub fn sumar(&mut self){
-        let val1 = self.desapilar();
-        let val2 = self.desapilar();
-        self.apilar(val1+val2);
-    }
-
-    pub fn restar(&mut self){
-        let val1 = self.desapilar();
-        let val2 = self.desapilar();
-        self.apilar(val2-val1);
-    }
-
-    pub fn dividir(&mut self){
-        let val1 = self.desapilar();
-        let val2 = self.desapilar();
-        self.apilar(val2/val1);
-    }
-
-    pub fn multiplicar(&mut self){
-        let val1 = self.desapilar();
-        let val2 = self.desapilar();
-        self.apilar(val2*val1);
-    }
-
-    pub fn dup(&mut self){
-        let val1 = self.desapilar();
-        self.apilar(val1);
-        self.apilar(val1);
-
-    }
-
-    pub fn drop(&mut self){
-        self.desapilar();
-    }
-
-    pub fn swap(&mut self){
-        let val1 = self.desapilar();
-        let val2 = self.desapilar();
-        self.apilar(val1);
-        self.apilar(val2);
-
-    }
-
-    pub fn over(&mut self){
-        let val1 = self.desapilar();
-        let val2 = self.desapilar();
-        self.apilar(val2);
-        self.apilar(val1);
-        self.apilar(val2);
-    }
-
-    pub fn rot(&mut self){
-
-        let val1 = self.desapilar();
-        let val2 = self.desapilar();
-        let val3 = self.desapilar();
-        self.apilar(val2);
-        self.apilar(val1);
-        self.apilar(val3);
-    }
     
-    pub fn emit(&mut self){
-        let valor = self.desapilar();
-        let mut imprimir: u8 = 127;
-        imprimir = imprimir & valor as u8;
-        print!("{} ", imprimir as char);
-    }
-
-    pub fn mayor(&mut self){
-        let val1 = self.desapilar();
-        let val2 = self.desapilar();
-        if val2>val1 {self.pila.push_back(-1)}
-        else{self.pila.push_back(0);}
-    }
-
-    pub fn menor(&mut self){
-        let val1 = self.desapilar();
-        let val2 = self.desapilar();
-        if val2<val1 {self.pila.push_back(-1)}
-        else{self.pila.push_back(0);}
-    }
-
-    pub fn igual(&mut self){
-        let val1 = self.desapilar();
-        let val2 = self.desapilar();
-        if val2==val1 {self.pila.push_back(-1)}
-        else{self.pila.push_back(0);}
-    }
-
-    pub fn and(&mut self){
-        let val1 = self.desapilar();
-        let val2 = self.desapilar();
-        self.apilar(val2&val1);
-    }
-
-    pub fn or(&mut self){
-        let val1 = self.desapilar();
-        let val2 = self.desapilar();
-        self.apilar(val2 | val1);
-    }
 }
 

@@ -6,7 +6,7 @@ use std::io::{self, BufReader};
 use std::io::prelude::*;
 use std::error::Error;
 
-fn leer_stack_size(arg_stack_size: &str) -> Result<u32, ParseIntError>{
+fn leer_stack_size(arg_stack_size: &str) -> Result<usize, ParseIntError>{
     let vec = arg_stack_size.chars();
     let mut numero: String = String::new();
     for caracter in vec{
@@ -14,7 +14,7 @@ fn leer_stack_size(arg_stack_size: &str) -> Result<u32, ParseIntError>{
             numero.push(caracter);
         }
     }
-    numero.parse::<u32>()
+    numero.parse::<usize>()
 }
 
 fn main() -> io::Result<()>{
