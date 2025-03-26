@@ -20,11 +20,9 @@ impl WordManager{
 
     pub fn obtener_instrucciones(&mut self, word_name: String) -> String{
         let mut instrucciones_en_string: String = String::new();
-        match self.diccionario.get(&word_name){
-            Some(word_inst) => 
-                    instrucciones_en_string.push_str(&word_inst),
-            None => (),
-        };
+        if let Some(word_inst) = self.diccionario.get(&word_name) { 
+            instrucciones_en_string.push_str(word_inst)
+        }
         instrucciones_en_string
     }
 }

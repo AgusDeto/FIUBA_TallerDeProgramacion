@@ -17,7 +17,7 @@ pub struct Forth{
 
 impl Forth{
     pub fn construir(size_in_bytes: usize)-> Forth{
-        let c = Forth{
+        Forth{
             tamanio_pila: if size_in_bytes == 0{
                 131072/2
             } else {size_in_bytes/2},
@@ -26,8 +26,7 @@ impl Forth{
             flag_literal: false,
             flag_error: false,
             flag_if: (false,false),
-        };
-        c
+        }
     }
 
     pub fn leer_linea(&mut self, linea: &str) -> bool{

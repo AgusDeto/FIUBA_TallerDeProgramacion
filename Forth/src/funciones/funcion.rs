@@ -33,9 +33,8 @@ impl Funcion{
                 "IF" => self.comienzo_if(pila),
                 &_ => (),
             }
-            match funcion.parse::<i16>() {
-                Ok(valor) => pila.apilar(valor),
-                Err(_) => (),
+            if let Ok(valor) = funcion.parse::<i16>() {
+                pila.apilar(valor) 
             }
         }
     
@@ -67,13 +66,14 @@ impl Funcion{
         }
         else{
             let mut cad_string = cadena.to_string();
-            match cad_string.pop(){
-                Some(val) => if val=='"'{
-                                        print!("{cad_string} ");
-                                    }else{print!("WRONG");},
-                None => (),
+            if let Some(val) = cad_string.pop() { 
+                if val=='"' {
+                    print!("{cad_string} ");
+                }else{
+                    print!("WRONG");
+                } 
             }
-            pila.flag_literal = false;
+        pila.flag_literal = false;
         }
     }
 
@@ -147,7 +147,7 @@ impl Funcion{
     pub fn emit(&mut self, pila: &mut super::Forth){
         let valor = pila.desapilar();
         let mut imprimir: u8 = 127;
-        imprimir = imprimir & valor as u8;
+        imprimir &= valor as u8;
         print!("{} ", imprimir as char);
     }
 
@@ -187,14 +187,10 @@ impl Funcion{
     pub fn comienzo_if(&mut self,pila: &mut super::Forth){
         if !pila.flag_if.0 {
             pila.flag_if.0 = true;
-            if pila.desapilar() == 0{
-                pila.flag_if.1 = false;
-            }
-            else{
-                pila.flag_if.1 = true;
-            }
-        } 
+            pila.flag_if.1 = pila.desapilar() != 0;
+        }
     }
+
     pub fn ejecutar_if(&mut self,pila: &mut super::Forth, funcion: &str){
         if funcion == "THEN" {
             pila.flag_if = (false,false);
